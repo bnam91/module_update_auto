@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "GitHub release auto updater",
   "type": "module",
-  "main": "release_test.js",
+  "main": "release_sample.js",
   "scripts": {
-    "start": "node release_test.js"
+    "start": "node release_sample.js"
   },
   "keywords": [],
   "author": "",
