@@ -1,0 +1,14 @@
+# 모든 .log 파일 무시
+*.log
+
+# 특정 폴더 무시
+logs/
+__pycache__/
+
+# 특정 파일 무시
+VERSION.txt
+
+# Node.js
+node_modules/
+.env
+package-lock.json
