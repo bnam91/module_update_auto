@@ -164,7 +164,9 @@ class ReleaseUpdater {
 
     executeCommand(command) {
         return new Promise((resolve, reject) => {
-            exec(command, (error, stdout, stderr) => {
+            // versionFile의 디렉토리에서 실행
+            const workDir = path.dirname(this.versionFile);
+            exec(command, { cwd: workDir }, (error, stdout, stderr) => {
                 if (error) {
                     reject(error);
                     return;
