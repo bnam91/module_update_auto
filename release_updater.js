@@ -10,15 +10,25 @@ class ReleaseUpdater {
     constructor(owner, repo, versionFile = "VERSION.txt") {
         this.owner = owner;
         this.repo = repo;
-        this.versionFile = versionFile;
+        // 경로 정규화 (절대 경로 또는 상대 경로 모두 처리)
+        this.versionFile = path.isAbsolute(versionFile) 
+            ? versionFile 
+            : path.resolve(process.cwd(), versionFile);
         this.apiUrl = `https://api.github.com/repos/${owner}/${repo}/releases/latest`; 
         // --개발용
         this.token = process.env.GITHUB_TOKEN;
     }
+    
+    // 서브모듈 모드인지 확인 (파일명 또는 경로에 SUBMODULE_VERSION.txt 포함 여부)
+    isSubmoduleMode() {
+        const fileName = path.basename(this.versionFile);
+        const filePath = this.versionFile.toLowerCase();
+        return fileName === "SUBMODULE_VERSION.txt" || filePath.includes("submodule_version.txt");
+    }
 
     async getLatestRelease() {
         try {
-            const repoLabel = this.versionFile === "SUBMODULE_VERSION.txt" 
+            const repoLabel = this.isSubmoduleMode() 
                 ? "[서브모듈]" 
                 : `[${this.owner}/${this.repo}]`;
             
@@ -36,7 +46,7 @@ class ReleaseUpdater {
                 assets: releaseData.assets
             };
         } catch (error) {
-            const repoLabel = this.versionFile === "SUBMODULE_VERSION.txt" 
+            const repoLabel = this.isSubmoduleMode() 
                 ? "[서브모듈]" 
                 : `[${this.owner}/${this.repo}]`;
             console.error(`${repoLabel} GitHub API 요청 중 오류 발생:`, error.message);
@@ -59,7 +69,7 @@ class ReleaseUpdater {
             const versionInfo = JSON.parse(fs.readFileSync(this.versionFile, 'utf8'));
             return versionInfo.tag_name;
         } catch (error) {
-            const repoLabel = this.versionFile === "SUBMODULE_VERSION.txt" 
+            const repoLabel = this.isSubmoduleMode() 
                 ? "[서브모듈]" 
                 : `[${this.owner}/${this.repo}]`;
             console.error(`${repoLabel} 버전 파일 읽기 오류:`, error.message);
@@ -69,6 +79,12 @@ class ReleaseUpdater {
 
     saveVersionInfo(releaseInfo) {
         try {
+            // 디렉토리가 없으면 자동 생성
+            const dir = path.dirname(this.versionFile);
+            if (!fs.existsSync(dir)) {
+                fs.mkdirSync(dir, { recursive: true });
+            }
+            
             fs.writeFileSync(
                 this.versionFile,
                 JSON.stringify(releaseInfo, null, 2),
@@ -76,7 +92,7 @@ class ReleaseUpdater {
             );
             return true;
         } catch (error) {
-            const repoLabel = this.versionFile === "SUBMODULE_VERSION.txt" 
+            const repoLabel = this.isSubmoduleMode() 
                 ? "[서브모듈]" 
                 : `[${this.owner}/${this.repo}]`;
             console.error(`${repoLabel} 버전 정보 저장 중 오류 발생:`, error.message);
@@ -85,7 +101,7 @@ class ReleaseUpdater {
     }
 
     async updateToLatest() {
-        const repoLabel = this.versionFile === "SUBMODULE_VERSION.txt" 
+        const repoLabel = this.isSubmoduleMode() 
             ? "[서브모듈]" 
             : `[${this.owner}/${this.repo}]`;
         

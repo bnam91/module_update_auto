@@ -1,23 +1,24 @@
 import dotenv from 'dotenv';
 import ReleaseUpdater from './release_updater.js';
+import config from './config.js';
 
 dotenv.config();
 
 async function main() {
     try {
-        // 방법 1: 자동 감지 (현재 Git 저장소에서 owner/repo 자동 감지)
-        // const updater = await ReleaseUpdater.create();
-        
-        // 방법 2: 환경 변수 사용 (GITHUB_OWNER, GITHUB_REPO)
-        // const updater = new ReleaseUpdater();
-        
         // 서브모듈 모드: 서브모듈 자체의 버전을 추적
         // 레포지토리는 고정: bnam91/module_update_auto
         const owner = "bnam91";
         const repo = "module_update_auto";
-        const versionFile = "SUBMODULE_VERSION.txt"; // 서브모듈 버전 파일
         
-        // 방법 3: 명시적 설정 (서브모듈 모드)
+        // config.js에서 서브모듈 버전 파일 경로 가져오기
+        const versionFile = config.submoduleVersionFile;
+        
+        console.log(`프로젝트 루트: ${config.projectRoot}`);
+        console.log(`서브모듈 경로: ${config.submodulePath}`);
+        console.log(`서브모듈 버전 파일: ${versionFile}`);
+        
+        // 서브모듈 모드로 업데이터 생성
         const updater = new ReleaseUpdater(owner, repo, versionFile);
         
         // 방법 4: 기존 방식 (하위 호환성)
