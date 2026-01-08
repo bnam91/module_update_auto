@@ -22,7 +22,21 @@ class ReleaseUpdater {
             // 새로운 방식: constructor({ owner, repo, versionFile, ... })
             this.owner = options.owner;
             this.repo = options.repo;
-            this.versionFile = options.versionFile || "VERSION.txt";
+            // 서브모듈 모드: 서브모듈 자체의 버전을 추적
+            this.isSubmodule = options.isSubmodule || false;
+            
+            // 서브모듈 모드일 때는 레포지토리 고정
+            if (this.isSubmodule) {
+                this.owner = "bnam91";
+                this.repo = "module_update_auto";
+            }
+            
+            // versionFile이 명시되지 않았을 때 서브모듈 모드에 따라 기본값 설정
+            if (options.versionFile) {
+                this.versionFile = options.versionFile;
+            } else {
+                this.versionFile = this.isSubmodule ? "SUBMODULE_VERSION.txt" : "VERSION.txt";
+            }
             this.silent = options.silent || false;
             this.onBeforeUpdate = options.onBeforeUpdate;
             this.onAfterUpdate = options.onAfterUpdate;
@@ -31,13 +45,16 @@ class ReleaseUpdater {
         // 설정 파일 로드
         this.config = this.loadConfig();
         
-        // 설정 파일에서 owner/repo 읽기
-        if (this.config?.owner && !this.owner) this.owner = this.config.owner;
-        if (this.config?.repo && !this.repo) this.repo = this.config.repo;
-        
-        // 환경 변수에서 읽기
-        if (!this.owner) this.owner = process.env.GITHUB_OWNER;
-        if (!this.repo) this.repo = process.env.GITHUB_REPO;
+        // 서브모듈 모드가 아닐 때만 설정 파일/환경 변수에서 owner/repo 읽기
+        if (!this.isSubmodule) {
+            // 설정 파일에서 owner/repo 읽기
+            if (this.config?.owner && !this.owner) this.owner = this.config.owner;
+            if (this.config?.repo && !this.repo) this.repo = this.config.repo;
+            
+            // 환경 변수에서 읽기
+            if (!this.owner) this.owner = process.env.GITHUB_OWNER;
+            if (!this.repo) this.repo = process.env.GITHUB_REPO;
+        }
         
         // 초기화 완료 여부 플래그 (자동 감지 필요 시 true로 설정)
         this._initialized = !!(this.owner && this.repo);
