@@ -1,6 +1,6 @@
 {
   "name": "module_update_auto",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "GitHub release auto updater",
   "type": "module",
   "main": "release_test.js",

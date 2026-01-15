@@ -116,8 +116,11 @@ class ReleaseUpdater {
         const latestVersion = latestRelease.tag_name;
 
         if (currentVersion === null) {
-            console.log(`${repoLabel} ⚠️ 첫 실행: 최신 버전 ${latestVersion}을 설치합니다.`);
-            return await this.performUpdate(latestRelease, repoLabel);
+            console.log(`${repoLabel} ⚠️ 첫 실행: 현재 버전 정보를 저장합니다.`);
+            // 첫 실행 시 Git 체크아웃 없이 바로 VERSION.txt 생성
+            this.saveVersionInfo(latestRelease);
+            console.log(`${repoLabel} ✅ 버전 정보 저장 완료: ${latestVersion}`);
+            return true;
         } else if (currentVersion !== latestVersion) {
             console.log(`${repoLabel} 🔄 업데이트 필요: ${currentVersion} → ${latestVersion}`);
             return await this.performUpdate(latestRelease, repoLabel);
